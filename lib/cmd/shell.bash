@@ -1,0 +1,3 @@
+shell:main() (
+  run bash
+)

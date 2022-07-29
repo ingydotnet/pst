@@ -1,0 +1,37 @@
+#!/bash
+
+bpan::init::auto() {
+  local auto entry args
+  auto=${1//=/}
+  while read -r entry; do
+    # Xhellcheck disable=2086
+    args=${entry#*=}
+    cmd=${entry#bpan.init.$auto.}
+    cmd=${cmd%=*}
+    "bpan::init::auto::$cmd" $args
+  done <<< \
+    "$(git config -f "$root/package.ini" --list |
+      grep "^bpan\.init\.$auto\."
+    )"
+}
+
+bpan::init::auto::source() {
+  source "$@"
+}
+
+bpan::init::auto::path-add() {
+  local base dir
+  base=$(cd "$root" && git rev-parse --show-toplevel)
+  for dir; do
+    if [[ $dir == bin || $dir == lib ]]; then
+      PATH=$base/$dir:$PATH
+    else
+      PATH=$dir:$PATH
+    fi
+    export PATH
+  done
+}
+
+bpan::init::auto "$@"
+
+unset -f bpan::init::auto

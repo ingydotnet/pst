@@ -1,0 +1,21 @@
+name=
+slug=
+site=
+pkgs=
+rbin=
+comp=
+pkgr=
+line=""
+desc="\
+"
+# See https://en.wikipedia.org/wiki/Comparison_of_programming_languages
+tags=(
+  open-source
+  imperative
+  object-oriented
+  functional
+  procedural
+  generic
+  reflective
+  concurrent
+)

@@ -1,0 +1,4 @@
+publish:main() (
+  lang
+)
+

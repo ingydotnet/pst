@@ -1,0 +1,5 @@
+# see: https://guides.cocoapods.org/making/getting-setup-with-trunk
+
+machine trunk.cocoapods.org
+  login $username
+  password $apitoken

@@ -1,0 +1,9 @@
+# See https://www.shellcheck.net/wiki/SC#### for detailed info on an error code:
+
+disable=1090    # Can't follow non-constant source. Use a directive to specify location.
+disable=1091    # Not following: .confluence.sh was not specified as input (see shellcheck -x).
+disable=2034    # <variable> appears unused. Verify use (or export if used externally).
+disable=2154    # <variable> is referenced but not assigned.
+disable=2164    # Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
+disable=2207    # Prefer mapfile or read -a to split command output (or quote to avoid splitting).
+disable=2217    # Redirecting to 'getopt', a command that doesn't read stdin. Bad quoting, wrong command or missing xargs?

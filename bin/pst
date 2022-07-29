@@ -1,0 +1,330 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=2030,2031
+
+App=Pst
+app=${App,,}
+APP=${App^^}
+ROOT=${APP}_ROOT
+VERSION=${APP}_VERSION
+[[ ${!ROOT-} && ${!VERSION-} ]] || {
+  echo "$ROOT not set. 'source /path/to/$app/.rc'"
+  exit 1
+}
+
+source "${!ROOT:?}/.bpan/init" auto vars
+
+getopt="\
+$app [<options>] <cmd> [<cmd-opts...>] [<cmd-args>]
+
+Commands:
+
+help          Get help for a command
+cmds          List available commands
+list          List all the supported languages
+info          Get info about a language/env
+version       Show version(s) of language tools
+
+new           Create a new package
+repl          Start a REPL for the language
+shell         Start $app shell for package
+build         Build the package
+test          Test the package
+publish       Publish the package
+search        Search for published packages
+clean         Remove the build files and dirs
+
+run           Run a shell command on $app server
+server        --start, --stop, --status --restart
+
+Options:
+--
+l,lang=       Programming language of package
+a,all         Apply cmd to all languages
+r,root        Run server commands as root
+R,restart     Restart server before command
+
+v,verbose     Print more output
+q,quiet       Print less output
+
+h,help        Show the command summary
+V,version     Display $app version
+x,debug       Print lots of debugging info
+"
+
+main() (
+  get-options "$@"; set -- "${args[@]}"
+
+  if $option_restart; then
+    source "$root/lib/cmd/server.bash"
+    server:restart
+  fi
+
+  if [[ ${option_lang-} ]]; then
+    get-lang
+    source "$root/src/$lang/cmd.bash"
+    if func "$lang:$command"; then
+      func=$lang:$command
+    elif func "$lang:main"; then
+      func=$lang:main
+    else
+      error "Command '$command' not supported for language '$lang'"
+    fi
+  elif source "$root/lib/cmd/$command.bash" &&
+       $option_all
+  then
+    if func "$command:all"; then
+      func=$command:all
+    else
+      error "Option '--all' not supported for command '$command'"
+    fi
+  else
+    if func "$command:main"; then
+      func=$command:main
+    else
+      error "Function '$command:main' not defined"
+    fi
+  fi
+
+  "$func" "$@"
+)
+
+run() (
+  if $option_root; then
+    cmd=("$@")
+  else
+    cmd=("/$app/lib/docker/bin/shell-init" "$@")
+  fi
+
+  docker_server_id=$(get-docker-server-id)
+
+  $option_verbose && set -x
+
+  docker exec -it \
+    "${docker_args[@]}" \
+    "$docker_server_id" \
+      "${cmd[@]}"
+)
+
+lang() (
+  get-lang
+  source "$root/src/$lang/cmd.bash"
+  if func "$lang:$command"; then
+    "$lang:$command" "$@"
+  elif func "$lang:main"; then
+    "$lang:main" "$@"
+  else
+    "$lang:meta"
+    error "'$Y$app $command$R' not implemented for '$Y$language_name$R'"
+  fi
+)
+
+get-lang() {
+  local l
+
+  if [[ ${option_lang-} ]]; then
+    lang="$option_lang"
+  elif [[ -e project.clj ]]; then
+    lang=clojure
+  elif [[ -e Project.toml ]]; then
+    lang=julia
+  elif [[ -e META6.json ]]; then
+    lang=raku
+  elif [[ -e Gemfile ]]; then
+    lang=ruby
+  else
+    error "Can't determine language. Use --lang=..."
+  fi
+
+  set +x
+  for l in "${langs[@]}"; do
+    if [[ $lang == "$l" ]]; then
+      return
+    fi
+  done
+
+  error "Language '$lang' is not supported by $app"
+}
+
+get-config() {
+  local var VAR
+  for var; do
+    VAR=${var^^}
+    unset "$VAR"
+  done
+  source <(
+    git config --list --file "$HOME/.$app/config" |
+      grep "^lang.$language" |
+      cut -d. -f3- |
+      perl -pe 's/^(\w+)=/uc($1) . "="/gem'
+  )
+  for var; do
+    [[ ${!VAR-} ]] ||
+      error "No value 'lang.$language.$var' found in ~/.$app/config"
+  done
+}
+
+print-version() (
+  cat <<...
+$app v$version
+Package Super Tool
+Copyright 2022 Ingy döt Net
+https://github.com/ingydotnet/pst
+...
+)
+
+# XXX shellcheck false positive
+# shellcheck disable=2128,2178
+version() (
+  if [[ $# -eq 3 && $3 =~ ^[0-9]+$ ]]; then
+    name=$1 cmd=$2 word=$3
+    words=($(run "eval $cmd" || true))
+  elif [[ $# -eq 2 && $2 =~ ^[0-9]+$ ]]; then
+    name=$1 cmd=$1 word=$2
+    words=($(run "$cmd" --version))
+  else
+    die
+  fi
+
+  version=${words[$((word-1))]}
+  version=${version%,}
+
+  printf '  %-12s %s\n' "$name:" "$version" | tr -d '\r'
+)
+
+get-options() {
+  local getopt_default_help=false getopt_args='@args' getopt_debug=debug
+
+  root=${!ROOT}
+  version=${!VERSION}
+  [[ -f $root/bin/$app ]] ||
+    error "$ROOT variable is has bad value '$root'"
+
+  if [[ $# -eq 0 ]]; then
+    set -- --help
+  fi
+
+  cmds=($(grep -E '^[a-z]+  ' <<<"$getopt" | cut -d' ' -f1))
+
+  option_quiet=false
+  local words=() want=true
+  while [[ $# -gt 0 ]]; do
+    if [[ $1 =~ ^(-l|--lang)$ ]]; then
+      words+=("$1"); shift
+      want=false
+      continue
+    fi
+    if $want && [[ $1 =~ ^[a-z]+$ ]]; then
+      command=$1; shift
+      [[ " ${cmds[*]} " == *\ $command\ * ]] ||
+        error "Invalid $app command '$command'"
+      break
+    fi
+    words+=("$1"); shift
+    want=true
+  done
+  local cmd_opts=("$@")
+  set -- "${words[@]}"
+
+  getopt "$@" <<<"$getopt"
+  $option_debug && set -x
+
+  args+=("${cmd_opts[@]}")
+
+  if $option_version; then
+    print-version
+    exit
+  fi
+
+  if ! [[ ${command-} ]]; then
+    if [[ ${option_server-} ]]; then
+      command=server
+      server_command=$option_server
+      [[ $server_command =~ ^(start|stop|restart|status)$ ]] ||
+        error "--server=... must be 'start', 'stop', 'restart' or 'status'"
+    elif [[ ${option_run-} ]]; then
+      command=run
+    else
+      error "You must specify a command option"
+    fi
+  fi
+
+  get-vars
+}
+
+get-vars() {
+  langs=($(cd $root/src && echo *))
+
+  base=$(git rev-parse --show-toplevel 2>/dev/null || readlink -f .)
+
+  home=$HOME/.$app
+  [[ -d $home ]] || mkdir -p "$home"
+
+  tmp=$home/tmp
+  [[ -d $tmp ]] || mkdir -p "$tmp"
+
+  bashrc=$home/bashrc
+  [[ -f $bashrc ]] || touch "$bashrc"
+
+  bash_history=$home/bash_history
+  touch "$bash_history"
+
+  docker_servers=$home/servers
+  [[ -f $docker_servers ]] ||
+    touch "$docker_servers"
+
+  docker_image=ingy/$app:$version
+
+  docker_args=(
+    --workdir "/host/${PWD#$base}" \
+    --env HOST_UID=$(id -u) \
+    --env HOST_GID=$(id -g) \
+  )
+  if $option_debug; then
+    docker_args+=(--env "${APP}_SET_X=1")
+  fi
+}
+
+get-docker-server-id() (
+  id=$(grep "^$base"$'\t' "$docker_servers" || true)
+
+  if ! [[ $id ]]; then
+    "$app" --quiet server --start || true
+    id=$(grep "^$base"$'\t' "$docker_servers" || true)
+  fi
+
+  [[ $id ]] || {
+    echo-r "No $app Docker server is running for '$base' and couldn't start one"
+    exit 1
+  }
+
+  read -r dir server_id name <<<"$id"
+
+  echo "$server_id"
+)
+
+# XXX shellcheck false positive
+# shellcheck disable=2234
+func() (
+  [[ $(type -t "$1") == function ]]
+)
+
+error() {
+  echo-r "Error: $*" >&2
+  exit 1
+}
+
+todo() {
+  error "'$app $command' not implemented yet"
+}
+
+R='\e[1;31m'
+G='\e[1;32m'
+Y='\e[1;33m'
+Z='\e[0m'
+echo-e() ( $option_quiet || echo -e "$*$Z" )
+echo-r() ( $option_quiet || echo -e "$R$*$Z" )
+echo-g() ( $option_quiet || echo -e "$G$*$Z" )
+echo-y() ( $option_quiet || echo -e "$Y$*$Z" )
+
+main "$@"

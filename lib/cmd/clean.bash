@@ -1,0 +1,4 @@
+clean:main() (
+  lang
+)
+

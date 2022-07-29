@@ -1,0 +1,8 @@
+# shellcheck shell=bash
+
+PST_VERSION=0.1.0
+PST_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
+PATH=$PST_ROOT/bin:$PST_ROOT/.bpan:$PATH
+MANPATH=$(IFS=:; set -- "$PST_ROOT/man" $MANPATH; echo "$*")
+
+export PATH MANPATH PST_ROOT PST_VERSION

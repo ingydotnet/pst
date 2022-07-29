@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use FindBin;
+use Cwd 'abs_path';
+use YAML::PP;
+use IO::All;
+use XXX;
+
+my $root = abs_path("$FindBin::Bin/../../..");
+
+my $data = YAML::PP::LoadFile("$root/Languages");
+
+for my $slug (sort keys %$data) {
+    my $info = $data->{$slug};
+    my $file = io("$root/src/$slug/cmd.bash")->utf8;
+    my $old = $file->all or die;
+    my $new = $old;
+    $new =~ s{^$slug:meta\(\)\ \{\n.*?\n\}\n+}{}msg;
+
+    my ($name, $line, $desc) =
+        @$info{qw(name line desc)};
+
+    $desc =~ s/"/\\"/g;
+
+    my $func = <<"...";
+$slug:meta() {
+  language_name="$name"
+  tag_line="$line"
+  language_description="\\\n$desc"
+}
+...
+
+    $new = $func . "\n". $new;
+
+    if ($new ne $old) {
+        print "Updated '$slug:info'\n";
+        $file->print($new);
+    }
+}
