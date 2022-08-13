@@ -1,0 +1,3 @@
+add:main() (
+  lang
+)

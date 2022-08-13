@@ -16,7 +16,7 @@ csharp:main() (
 csharp:version() (
   version mono-csc 5
   version mcs 5
-  version dotnet 1
+  version dotnet 'dotnet --version' 1
   version mono 5
   version nuget 'nuget help 2>/dev/null | head -n1' 3
 )

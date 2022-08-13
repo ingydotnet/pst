@@ -1,4 +1,3 @@
 publish:main() (
   lang
 )
-

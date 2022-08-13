@@ -1,4 +1,3 @@
 clean:main() (
   lang
 )
-

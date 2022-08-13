@@ -1,0 +1,3 @@
+uninstall:main() (
+  lang
+)

@@ -12,35 +12,90 @@ VERSION=${APP}_VERSION
   exit 1
 }
 
-source "${!ROOT:?}/.bpan/init" auto vars
+source "${!ROOT}/.bpan/init" auto vars
+
+# https://gist.github.com/ingydotnet/9e229bd583687bc62854c7575f88a8bc
+# is the `--help` output from all the package managers used here.
+# Many command ideas came from there.
 
 getopt="\
-$app [<options>] <cmd> [<cmd-opts...>] [<cmd-args>]
+$app [<$app-opts>] <cmd> [<cmd-opts>] [<cmd-args>]
+$app --help       # This overview
+$app help         # Full documentation for $app
+$app help <cmd>   # Documentation for a command
 
-Commands:
+Try:
+  $ $app --all version
+  $ $app shell
 
-help          Get help for a command
-cmds          List available commands
-list          List all the supported languages
-info          Get info about a language/env
-version       Show version(s) of language tools
+Project Commands:
+  new           Create a new project/package
+  build         Build the project
+  test          Run the project tests
+  run           Run project's main function
+  register      Register a new project
+  publish       Publish the project package
+  repo          Show project repo information
+  update        Update template files and deps
+  deps          List declared deps
+  fetch         Install declared deps
+  add           Add a package dep to a project
+  rm            Remove a package dependency
+  clean         Remove the build files and dirs
+  lint          Run linters for project
+  fmt           Run code formatters for project
+  bench         Run benchmarks
+  bump          Bump the project version
+  change        Add a changelog entry
 
-new           Create a new package
-repl          Start a REPL for the language
-shell         Start $app shell for package
-build         Build the package
-test          Test the package
-publish       Publish the package
-search        Search for published packages
-clean         Remove the build files and dirs
+Language Commands:
+  list          List all the supported languages
+  repl          Start a REPL for the language
+  version       Show version(s) of language tools
+  info          Get info about a language + tools
+  login         Login to language host system
+  whoami        Show your user info for host
+  lsp           Start LSP server
 
-run           Run a shell command on $app server
-server        --start, --stop, --status --restart
+Package Commands:
+  search        Search for published packages
+  install       Install a package
+  uninstall     Uninstall a package
+  meta          Show meta info for a package
+  doc           Show documentation for package
+  source        Shell into a package source dir
+  url           Show URL(s) for a package
+  star          Star a package
+  unstar        Unstar a package
+  watch         Watch a package
+  unwatch       Unwatch a package
+
+System Commands:
+  shell         Start $app shell for package
+  exec          Run a shell command on $app server
+  config        Configure $app
+  system        Show $app system information
+  upgrade       Upgrade the $app command
+  server        --start, --stop, --status --restart
+  prune         Remove various $app artifacts
+  init          Print shell init source
+  complete      Print shell completion source
+
+Information Commands:
+  help          Get help for a command
+  cmds          List available commands
+
+Command Aliases:
+commands        = cmds
+compile         = build
+look            = source
+release         = publish
 
 Options:
 --
 l,lang=       Programming language of package
 a,all         Apply cmd to all languages
+f,force       Force an action
 r,root        Run server commands as root
 R,restart     Restart server before command
 
@@ -174,11 +229,12 @@ https://github.com/ingydotnet/pst
 )
 
 # XXX shellcheck false positive
+# https://github.com/koalaman/shellcheck/issues/680
 # shellcheck disable=2128,2178
 version() (
   if [[ $# -eq 3 && $3 =~ ^[0-9]+$ ]]; then
     name=$1 cmd=$2 word=$3
-    words=($(run "eval $cmd" || true))
+    words=($(run "eval $cmd | ansi2txt" || true))
   elif [[ $# -eq 2 && $2 =~ ^[0-9]+$ ]]; then
     name=$1 cmd=$1 word=$2
     words=($(run "$cmd" --version))
@@ -204,7 +260,7 @@ get-options() {
     set -- --help
   fi
 
-  cmds=($(grep -E '^[a-z]+  ' <<<"$getopt" | cut -d' ' -f1))
+  cmds=($(grep -E '^  \w+  ' <<<"$getopt" | cut -d' ' -f3))
 
   option_quiet=false
   local words=() want=true
@@ -304,6 +360,7 @@ get-docker-server-id() (
 )
 
 # XXX shellcheck false positive
+# https://github.com/koalaman/shellcheck/issues/2169
 # shellcheck disable=2234
 func() (
   [[ $(type -t "$1") == function ]]

@@ -1,0 +1,3 @@
+watch:main() (
+  lang
+)

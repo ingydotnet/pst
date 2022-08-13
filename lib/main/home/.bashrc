@@ -25,6 +25,7 @@ path=(
   /usr/local/haxe-4.2.5
   /usr/local/neko-2.3.0-linux64
   ~/.nimble/bin
+  ~/node_modules/.bin
   /opt/rakudo-pkg/bin
   /opt/rakudo-pkg/share/perl6/site/bin
   ~/.raku/bin

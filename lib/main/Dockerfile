@@ -14,6 +14,7 @@ FROM $BASE_NAME-d           AS d
 FROM $BASE_NAME-dart        AS dart
 FROM $BASE_NAME-denojs      AS denojs
 FROM $BASE_NAME-elixir      AS elixir
+FROM $BASE_NAME-erlang      AS erlang
 FROM $BASE_NAME-fortran     AS fortran
 FROM $BASE_NAME-go          AS go
 FROM $BASE_NAME-groovy      AS groovy
@@ -38,6 +39,7 @@ FROM $BASE_NAME-ruby        AS ruby
 FROM $BASE_NAME-rust        AS rust
 FROM $BASE_NAME-scala       AS scala
 FROM $BASE_NAME-swift       AS swift
+FROM $BASE_NAME-tsc         AS tsc
 
 # Build the main image:
 FROM $BASE_IMAGE
@@ -47,6 +49,7 @@ RUN set -x \
  && apt-get update \
  && apt-get install -y \
         bash-completion \
+        colorized-logs \
         emacs-nox \
         fish \
         fish-common \
@@ -74,6 +77,7 @@ COPY --from=dart    /export/ /
 COPY --from=denojs  /export/ /
 COPY --from=d       /export/ /
 COPY --from=elixir  /export/ /
+COPY --from=erlang  /export/ /
 COPY --from=fortran /export/ /
 COPY --from=go      /export/ /
 COPY --from=groovy  /export/ /
@@ -98,6 +102,7 @@ COPY --from=ruby    /export/ /
 COPY --from=rust    /export/ /
 COPY --from=scala   /export/ /
 COPY --from=swift   /export/ /
+COPY --from=tsc     /export/ /
 
 RUN set -x \
  && locale-gen en_US.UTF-8 \

@@ -1,0 +1,3 @@
+install:main() (
+  lang
+)

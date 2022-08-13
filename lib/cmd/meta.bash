@@ -1,0 +1,3 @@
+meta:main() (
+  lang
+)

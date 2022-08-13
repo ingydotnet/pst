@@ -35,7 +35,7 @@ add-lang:
 	( \
 	    set -ex; \
 	    cp -Ppr lib/lang src/$L; \
-	    vim Languages Config.mk src/$L/Dockerfile lib/main/Dockerfile -O \
+	    vim Languages src/$L/* lib/main/Dockerfile -O \
 	)
 
 force:
@@ -55,7 +55,11 @@ meta-update:
 # build: proxy-up lib/base $(DOCKER_LANGUAGES) lib/main proxy-down
 build: lib/base $(DOCKER_LANGUAGES) lib/main
 
-test: build
+test:
+	@echo 'TODO - write tests'
+
+clean:
+	rm -fr target
 
 push: build
 	docker push $(DOCKER_IMAGE)

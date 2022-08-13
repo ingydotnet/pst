@@ -78,6 +78,27 @@ clojure:
   - dynamic
   - lisp
 
+coffee:
+  name: CoffeeScript
+  line: A little language that compiles into JavaScript
+  site: https://coffeescript.org/
+  desc: |
+    Underneath that awkward Java-esque patina, JavaScript has always had a
+    gorgeous heart. CoffeeScript is an attempt to expose the good parts of
+    JavaScript in a simple way.  The golden rule of CoffeeScript is: “It’s just
+    JavaScript.” The code compiles one-to-one into the equivalent JS, and there
+    is no interpretation at runtime. You can use any existing JavaScript
+    library seamlessly from CoffeeScript (and vice-versa). The compiled output
+    is readable, pretty-printed, and tends to run as fast or faster than the
+    equivalent handwritten JavaScript.
+  tool:
+    run: coffee
+  pkgs:
+    tool: npm
+    site: https://www.npmjs.com/
+  tags:
+  - transpiled
+
 cpp:
   name: C++
   line: C with Classes
@@ -212,6 +233,23 @@ elixir:
   pkgs:
     tool: hex
     site: https://hex.pm/
+  tags:
+  - dynamic
+
+erlang:
+  name: Erlang
+  line: Practical functional programming for a parallel world
+  site: https://www.erlang.org/
+  desc: |
+    Erlang is a general-purpose programming language and runtime environment.
+    Erlang has built-in support for concurrency, distribution and fault
+    tolerance. Erlang is used in several large telecommunication systems from
+    Ericsson. Erlang is available as open source from http://www.erlang.org.
+  tool:
+    run: erl
+  pkgs:
+    tool: ???
+    site: ???
   tags:
   - dynamic
 
@@ -651,5 +689,20 @@ swift:
     site: https://swiftpackageindex.com/
   tags:
   - compiled
+
+tsc:
+  name: TypeScript
+  line: JavaScript with syntax for types
+  site: https://www.typescriptlang.org/
+  desc: |
+    TypeScript is a strongly typed programming language that builds on
+    JavaScript, giving you better tooling at any scale.
+  tool:
+    comp: tsc
+  pkgs:
+    tool: npm
+    site: https://www.npmjs.com/
+  tags:
+  - transpiled
 
 # vim: sw=2:

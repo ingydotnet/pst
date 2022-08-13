@@ -1,0 +1,3 @@
+lint:main() (
+  lang
+)

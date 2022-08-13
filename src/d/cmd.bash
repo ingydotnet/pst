@@ -18,5 +18,5 @@ d:main() (
 
 d:version() (
   version dmd '~/dlang/dmd-2.100.0/linux/bin64/dmd --version' 4
-  version dmd '~/dlang/dmd-2.100.0/linux/bin64/dub --version' 3
+  version dub '~/dlang/dmd-2.100.0/linux/bin64/dub --version' 3
 )

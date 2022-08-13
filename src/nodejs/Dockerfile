@@ -8,5 +8,10 @@ RUN set -x \
  && apt-get install -y \
         nodejs \
         npm \
- && find /usr -cnewer /stamp | cpio -dump /export \
+ && cd /root \
+ && npm install \
+        coffeescript \
+        typescript \
+ && chmod -R go+rw /root/node_modules \
+ && find /usr /root -cnewer /stamp | cpio -dump /export \
  && true

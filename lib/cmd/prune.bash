@@ -1,0 +1,3 @@
+prune:main() (
+  lang
+)

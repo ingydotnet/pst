@@ -25,40 +25,4 @@ UBUNTU := ubuntu:22.04
 FROM_BASE := $(UBUNTU)
 IMAGE_BASE := $(DOCKER_USER)/$(app)-base
 
-LANGUAGES := \
-    ada \
-    bash \
-    clisp \
-    clojure \
-    cpp \
-    crystal \
-    csharp \
-    d \
-    dart \
-    denojs \
-    elixir \
-    fortran \
-    go \
-    groovy \
-    guile \
-    haskell \
-    haxe \
-    java \
-    julia \
-    lua \
-    nim \
-    nodejs \
-    objc \
-    ocaml \
-    octave \
-    perl \
-    php \
-    python \
-    r \
-    racket \
-    raku \
-    ruby \
-    rust \
-    scala \
-    swift \
-
+LANGUAGES := $(shell cd $(ROOT)/src && echo *)

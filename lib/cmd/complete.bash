@@ -1,0 +1,3 @@
+complete:main() (
+  lang
+)

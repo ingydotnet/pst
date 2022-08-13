@@ -1,0 +1,3 @@
+system:main() (
+  lang
+)
