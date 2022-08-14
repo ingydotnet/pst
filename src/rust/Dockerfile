@@ -7,5 +7,6 @@ RUN set -x \
  && curl -fsSL --proto '=https' --tlsv1.2 https://sh.rustup.rs | \
         sh -s -- -y \
  && chmod -R go+rw /root \
+ && rm /root/.profile \
  && find /root -cnewer /stamp | cpio -dump /export \
  && true

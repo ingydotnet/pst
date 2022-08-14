@@ -51,6 +51,7 @@ RUN set -x \
         bash-completion \
         colorized-logs \
         emacs-nox \
+        figlet \
         fish \
         fish-common \
         less \

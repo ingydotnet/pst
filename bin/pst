@@ -125,9 +125,7 @@ main() (
     else
       error "Command '$command' not supported for language '$lang'"
     fi
-  elif source "$root/lib/cmd/$command.bash" &&
-       $option_all
-  then
+  elif $option_all; then
     if func "$command:all"; then
       func=$command:all
     else
@@ -302,6 +300,34 @@ get-options() {
       command=run
     else
       error "You must specify a command option"
+    fi
+  fi
+
+  # Get possible sub-command options:
+  source "$root/lib/cmd/$command.bash"
+  if func "$command:getopt"; then
+    unset sub_command
+    local getopt_spec
+    local getopt_default_help=false
+    local getopt_args='@args'
+    local getopt_cmds
+    getopt_cmds=()
+
+    "$command:getopt"
+
+    getopt "${args[@]}" <<<"$getopt_spec"
+
+    if [[ ${#getopt_cmds[*]} -gt 0 ]]; then
+      local cmd
+      for cmd in "${getopt_cmds[@]}"; do
+        local var=option_$cmd
+        if "${!var}"; then
+          sub_command=$cmd
+        fi
+      done
+
+      [[ ${sub_command-} ]] ||
+        die "Option required for '$app $command ...' command"
     fi
   fi
 

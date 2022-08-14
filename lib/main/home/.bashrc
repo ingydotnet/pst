@@ -1,3 +1,5 @@
+figlet -c -w 80 -m0 'Welcome to PST!!!'
+
 source /etc/profile.d/bash_completion.sh
 
 [[ $PST_SET_X ]] && set -x

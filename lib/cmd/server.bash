@@ -1,22 +1,31 @@
-getopt__server="\
-$app [<$app-opts>] server <options>
+server:getopt() {
+  getopt_default_help=true
+  getopt_cmds=(start stop restart status)
 
-Options:
+  getopt_spec="\
+$app [<$app-opts>] $command <$command-opts>
+
+Requires one of --start, --stop, --restart, --status
+
+'$app $command' Options:
 --
-s,start     Start $App Docker server
-k,stop      Stop $App Docker server
-R,restart   Restart $App Docker server
-S,status    Get $App Docker server status
+s,start       Start $App Docker server
+k,stop        Stop $App Docker server
+R,restart     Restart $App Docker server
+S,status      Get $App Docker server status
 
-h,help      Get help for server command
+a,all         Apply cmd to all servers
+
+h,help        Get help for server command
 "
-server_opts=(start stop restart status)
+}
 
 server:main() (
-  server:get-options "$@"
-  set -- "${args[@]}"
+  "server:$sub_command" "$@"
+)
 
-  "server:$server_cmd" "$@"
+server:all() (
+  server:main "$@"
 )
 
 server:start() (
@@ -77,7 +86,7 @@ server:status() (
 
   for server in "${servers[@]}"; do
     read dir id name <<<"$server"
-    echo-e "* ${G}A $App Docker server is running for directory '$base'"
+    echo-e "* ${G}A $App Docker server is running for directory '$dir'"
     echo-y "    Docker container id '$id' ($name)"
   done
 )
@@ -97,7 +106,11 @@ get-servers-list() {
   while read -r server; do
     servers+=("$server")
   done < <(
-    grep "^$base"$'\t' "$docker_servers" || true
+    if $option_all; then
+      cat "$docker_servers"
+    else
+      grep "^$base"$'\t' "$docker_servers" || true
+    fi
   )
 
   set -- "${servers[@]}"
@@ -127,20 +140,3 @@ delete-server-entry() (
   grep -v "^$dir"$'\t' "$docker_servers" > "$file" || true
   mv "$file" "$docker_servers"
 )
-
-server:get-options() {
-  local getopt_default_help=true getopt_args='@args'
-
-  getopt "$@" <<<"$getopt__server"
-
-  local opt
-  for opt in "${server_opts[@]}"; do
-    local var=option_$opt
-    if "${!var}"; then
-      server_cmd=$opt
-    fi
-  done
-
-  [[ ${server_cmd-} ]] ||
-    die "Option required for '$app server ...' command"
-}
