@@ -48,19 +48,25 @@ FROM $BASE_IMAGE
 RUN set -x \
  && apt-get update \
  && apt-get install -y \
+        ash \
         bash-completion \
         colorized-logs \
+        csh \
+        dash \
         emacs-nox \
         figlet \
         fish \
         fish-common \
+        ksh \
         less \
         locales \
         silversearcher-ag \
         sudo \
+        tcsh \
         tig \
         tmate \
         tmux \
+        toilet \
         vim \
         zsh \
         zsh-common \
@@ -109,9 +115,8 @@ RUN set -x \
  && locale-gen en_US.UTF-8 \
  && true
 
-# Copy homedir files to both /root and ~user:
-COPY home/ /root/
-COPY home/ /home/user/
+# Copy various system config files:
+COPY file/ /
 
 # Make a user.
 # Default to 1000 but changed to match host if necessary.
@@ -124,7 +129,10 @@ RUN set -x \
 
 # Symlink ~root/ files to ~user/
 RUN set -x \
- && chown user.user /home/user \
+ && chown 1000.1000 /home/user \
+ && chown 1000.1000 /home/user/.bashrc \
+ && rm -f /root/.bashrc \
+ && ln -s /home/user/.bashrc /root/.bashrc \
  && cd /home/user \
  && for d in $(ls -A1 /root/ | grep -Ev '(bashrc)'); do \
         ln -s /root/$d; \
@@ -133,8 +141,9 @@ RUN set -x \
 
 # Link some user files and dirs fo ~root/ and ~user/ to user prefs:
 RUN set -x \
- && ls -la /root && ls -la /home/user \
+ && chmod a+x /root \
  && ln -s /me/ssh /root/.ssh \
  && ln -s /me/ssh /home/user/.ssh \
- && ls -la /root && ls -la /home/user \
+ && ls -la /root \
+ && ls -la /home/user \
  && true

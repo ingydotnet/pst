@@ -1,0 +1,3 @@
+#!/bin/sh
+
+figlet -c -w 80 -m0 'Welcome to PST!!!'

@@ -2,7 +2,7 @@
 
 getopt() {
   local opt_spec
-  getopt_spec=$(
+  local getopt_spec=$(
     perl -pe 's/^$/ / if $a; $a=1 if /^--$/'
   )
   opt_spec=$(

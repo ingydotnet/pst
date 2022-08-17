@@ -25,7 +25,7 @@ $app help         # Full documentation for $app
 $app help <cmd>   # Documentation for a command
 
 Try:
-  $ $app --all version
+  $ $app version --all
   $ $app shell
 
 Project Commands:
@@ -93,11 +93,9 @@ release         = publish
 
 Options:
 --
-l,lang=       Programming language of package
-a,all         Apply cmd to all languages
+R,restart     Restart server before command
 f,force       Force an action
 r,root        Run server commands as root
-R,restart     Restart server before command
 
 v,verbose     Print more output
 q,quiet       Print less output
@@ -112,41 +110,22 @@ main() (
 
   if $option_restart; then
     source "$root/lib/cmd/server.bash"
-    server:restart
+    option_all=false server:restart
   fi
 
-  if [[ ${option_lang-} ]]; then
-    get-lang
-    source "$root/src/$lang/cmd.bash"
-    if func "$lang:$command"; then
-      func=$lang:$command
-    elif func "$lang:main"; then
-      func=$lang:main
-    else
-      error "Command '$command' not supported for language '$lang'"
-    fi
-  elif $option_all; then
-    if func "$command:all"; then
-      func=$command:all
-    else
-      error "Option '--all' not supported for command '$command'"
-    fi
-  else
-    if func "$command:main"; then
-      func=$command:main
-    else
-      error "Function '$command:main' not defined"
-    fi
-  fi
+  func=$command:main
 
   "$func" "$@"
 )
 
 run() (
   if $option_root; then
+    docker_args+=(--user=root)
     cmd=("$@")
   else
-    cmd=("/$app/lib/docker/bin/shell-init" "$@")
+    docker_args+=(--user=user)
+    cmd=("$@")
+    # cmd=("/$app/lib/docker/bin/shell-init" "$@")
   fi
 
   docker_server_id=$(get-docker-server-id)
@@ -167,10 +146,25 @@ lang() (
   elif func "$lang:main"; then
     "$lang:main" "$@"
   else
-    "$lang:meta"
-    error "'$Y$app $command$R' not implemented for '$Y$language_name$R'"
+    if [[ ${getopt_spec-} ]]; then
+      getopt -h <<<"$getopt_spec"
+    else
+      "$lang:meta"
+      error "'$Y$app $command$R' not implemented for '$Y$language_name$R'"
+    fi
   fi
 )
+
+lang:getopt() {
+  getopt_spec="\
+$app [<$app-opts>] $command <$command-opts>
+
+'$app $command' Options:
+--
+l,lang=       Programming language for $command
+h,help        Get help for $command command
+"
+}
 
 get-lang() {
   local l
@@ -185,11 +179,14 @@ get-lang() {
     lang=raku
   elif [[ -e Gemfile ]]; then
     lang=ruby
+  elif [[ ${getopt_spec-} ]]; then
+    echo "Can't determine language. Use --lang=..."
+    echo
+    getopt -h <<<"$getopt_spec"
   else
     error "Can't determine language. Use --lang=..."
   fi
 
-  set +x
   for l in "${langs[@]}"; do
     if [[ $lang == "$l" ]]; then
       return
@@ -307,7 +304,6 @@ get-options() {
   source "$root/lib/cmd/$command.bash"
   if func "$command:getopt"; then
     unset sub_command
-    local getopt_spec
     local getopt_default_help=false
     local getopt_args='@args'
     local getopt_cmds
@@ -315,7 +311,10 @@ get-options() {
 
     "$command:getopt"
 
-    getopt "${args[@]}" <<<"$getopt_spec"
+    set -- "${args[@]}"
+    args=()
+
+    getopt "$@" <<<"$getopt_spec"
 
     if [[ ${#getopt_cmds[*]} -gt 0 ]]; then
       local cmd
@@ -327,7 +326,7 @@ get-options() {
       done
 
       [[ ${sub_command-} ]] ||
-        die "Option required for '$app $command ...' command"
+        getopt -h <<<"$getopt_spec"
     fi
   fi
 
@@ -359,8 +358,7 @@ get-vars() {
 
   docker_args=(
     --workdir "/host/${PWD#$base}" \
-    --env HOST_UID=$(id -u) \
-    --env HOST_GID=$(id -g) \
+    --env USER=user \
   )
   if $option_debug; then
     docker_args+=(--env "${APP}_SET_X=1")

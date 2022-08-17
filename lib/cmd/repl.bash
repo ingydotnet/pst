@@ -1,3 +1,2 @@
-repl:main() (
-  lang
-)
+repl:getopt() { lang:getopt; }
+repl:main() ( lang )
