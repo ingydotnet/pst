@@ -51,9 +51,19 @@ server:start() (
   name=$(docker ps | grep -m1 "^$id ") || die
   name=${name##*\ }
 
-  if [[ $(id -u) != 1000 ]]; then
-    docker exec "$id" groupmod -g "$(id -g)" user
-    docker exec "$id" usermod -u "$(id -u)" -g "$(id -g)" user
+  uid=$(id -u)
+  if [[ $uid != 1000 ]]; then
+    gid=$(id -g)
+    if [[ $gid != 100 ]]; then
+      (
+        $option_verbose && set -x
+        docker exec "$id" groupmod -g "$(id -g)" user || true
+      )
+    fi
+    (
+      $option_verbose && set -x
+      docker exec "$id" usermod -u "$(id -u)" -g "$(id -g)" user
+    )
   fi
 
   printf "%s\t%s\t%s\n" "$base" "$id" "$name" >> "$docker_servers"
