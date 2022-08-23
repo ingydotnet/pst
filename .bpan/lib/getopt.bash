@@ -1,11 +1,21 @@
 # getopt-long library based around `git rev-parse --parseopt`
 
+[[ ${1-} ]] && getopt=$1
+
 getopt() {
-  local opt_spec
-  local getopt_spec=$(
-    perl -pe 's/^$/ / if $a; $a=1 if /^--$/'
-  )
-  opt_spec=$(
+  local opts_prefix=option
+  local args_var=
+  local default_arg='--help'
+  local catch_error=false
+
+  local getopt_spec
+  getopt_spec=${GETOPT_SPEC:-${getopt:-$(cat)}}
+
+  [[ $getopt_spec ]] ||
+    die "No getopt 'spec' provided"
+
+  local spec
+  spec=$(
     echo "$getopt_spec" |
       grep -A999999 '^--$' |
       grep -v '^\s*$' |
@@ -25,7 +35,7 @@ getopt() {
   ) || true
 
   if [[ $parsed =~ ^cat ]]; then
-    eval "$parsed" | getopt-pager
+    eval "$parsed" | getopt:pager
     exit 0
   else
     eval "$parsed"
@@ -47,7 +57,7 @@ getopt() {
         fi
       fi
     fi
-  done <<<"$opt_spec"
+  done <<<"$spec"
 
   while [[ $# -gt 0 ]]; do
     local option=$1; shift
@@ -90,13 +100,13 @@ getopt() {
         found=true
         break
       fi
-    done <<<"$opt_spec"
+    done <<<"$spec"
 
     $found || die "Unexpected option: '$option'"
   done
 
   local i arg_name arg_var required=false array=false re1='^\+'
-  for arg_name in $getopt_args; do
+  for arg_name in ${getopt_args-}; do
     arg_var=${arg_name//-/_}
     if [[ $arg_var =~ ^@ ]]; then
       array=true
@@ -112,7 +122,7 @@ getopt() {
     if [[ $# -gt 0 ]]; then
       if $array; then
         for ((i = 1; i <= $#; i++)); do
-          read -r "$arg_var"[i-1] <<< "${!i}"
+          read -r "${arg_var[i-1]}" <<< "${!i}"
         done
         set --
       else
@@ -124,9 +134,10 @@ getopt() {
       die "'$arg_name' is required"
     fi
   done
+
   [[ $# -eq 0 ]] || die "Unexpected arguments: '$*'"
 }
 
-getopt-pager() {
+getopt:pager() (
   less -FRX
-}
+)

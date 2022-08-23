@@ -55,8 +55,9 @@ meta-update:
 # build: proxy-up lib/base $(DOCKER_LANGUAGES) lib/main proxy-down
 build: lib/base $(DOCKER_LANGUAGES) lib/main
 
+.PHONY: test
 test:
-	@echo 'TODO - write tests'
+	bpan $@
 
 clean:
 	rm -fr target

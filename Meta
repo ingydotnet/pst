@@ -1,0 +1,32 @@
+[bpan]
+name = pst
+version = 0.1.0
+abstract = Package Super Tool — Package Management for All Programming Languages
+license = MIT
+copyright = 2022
+
+site = $repo
+repo = https://github.com/ingydotnet/pst
+bug = $repo/issues/
+irc = irc.libera.chat/pst
+
+[author]
+name = Ingy döt Net
+email = ingy@ingy.net
+github = ingydotnet
+libera = ingydotnet
+twitter = ingydotnet
+site = https://github.com/ingydotnet
+
+[require "bpan"]
+prelude-bash = 0.1.0+
+getopt-bash = 0.1.0+
+
+[require "commands"]
+bash = 3.2+
+docker = 20.0+
+git = 2.7+
+make = 3.81+
+perl = 5.14+
+
+# vim: ft=gitconfig:

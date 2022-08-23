@@ -2,9 +2,11 @@ SHELL := bash -e -u -o pipefail -O inherit_errexit
 
 app := pst
 
-ifndef PST_VERSION
-    $(error PST_VERSION not set. 'source /path/to/$(app)/.rc')
+ifndef PST_ROOT
+    $(error PST_ROOT not set. 'source /path/to/$(app)/.rc')
 endif
+
+PST_VERSION := $(shell git config -f $(PST_ROOT)/.bpan/config bpan.version)
 
 BASE_NAME := $(app)/$(app)
 

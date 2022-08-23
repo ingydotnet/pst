@@ -2,17 +2,19 @@
 
 # shellcheck disable=2030,2031
 
-App=Pst
+App=PST
 app=${App,,}
-APP=${App^^}
+APP=${app^^}
 ROOT=${APP}_ROOT
-VERSION=${APP}_VERSION
-[[ ${!ROOT-} && ${!VERSION-} ]] || {
-  echo "$ROOT not set. 'source /path/to/$app/.rc'"
+[[ ${!ROOT-} ]] || {
+  echo "Error: $ROOT not set."
+  echo "Try: 'source ${0/bin\/pst/.rc}"
   exit 1
 }
 
-source "${!ROOT}/.bpan/init" auto vars
+source "${!ROOT}/.bpan/lib/bpan.bash" --
+bpan:use prelude
+bpan:use getopt
 
 # https://gist.github.com/ingydotnet/9e229bd583687bc62854c7575f88a8bc
 # is the `--help` output from all the package managers used here.
@@ -247,7 +249,7 @@ get-options() {
   local getopt_default_help=false getopt_args='@args' getopt_debug=debug
 
   root=${!ROOT}
-  version=${!VERSION}
+  version=$(git config -f "$root/.bpan/config" bpan.version)
   [[ -f $root/bin/$app ]] ||
     error "$ROOT variable is has bad value '$root'"
 
@@ -314,7 +316,7 @@ get-options() {
     set -- "${args[@]}"
     args=()
 
-    getopt "$@" <<<"$getopt_spec"
+    getopt='' getopt "$@" <<<"$getopt_spec"
 
     if [[ ${#getopt_cmds[*]} -gt 0 ]]; then
       local cmd
@@ -334,7 +336,7 @@ get-options() {
 }
 
 get-vars() {
-  langs=($(cd $root/src && echo *))
+  langs=($(cd "$root/src" && echo *))
 
   base=$(git rev-parse --show-toplevel 2>/dev/null || readlink -f .)
 
