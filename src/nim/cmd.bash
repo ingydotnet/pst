@@ -17,6 +17,7 @@ nim:main() (
   run nimble "$command" "$@"
 )
 
+# shellcheck disable=2088
 nim:version() (
   version nim '~/.nimble/bin/nim --version' 4
   version nimble '~/.nimble/bin/nimble --version' 2

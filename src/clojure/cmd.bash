@@ -23,8 +23,8 @@ clojure:test() (
 
 clojure:publish() (
   get-config username apitoken
-  docker_args+=( --env USERNAME=$USERNAME )
-  docker_args+=( --env APITOKEN=$APITOKEN )
+  docker_args+=( --env USERNAME="$USERNAME" )
+  docker_args+=( --env APITOKEN="$APITOKEN" )
 
   if [[ ${1-} == :snapshot ]]; then
     shift

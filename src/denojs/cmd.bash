@@ -16,6 +16,7 @@ denojs:main() (
   run deno "$command" "$@"
 )
 
+# shellcheck disable=2088
 denojs:version() (
   version deno '~/.deno/bin/deno --version' 2
   version v8 '~/.deno/bin/deno --version' 6

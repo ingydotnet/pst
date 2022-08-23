@@ -2,7 +2,7 @@ list:main() (
   i=1
   for lang in "${langs[@]}"; do
     if $option_quiet; then
-      echo $lang
+      echo "$lang"
     else
       line=
       info=$root/src/$lang/cmd.bash

@@ -359,7 +359,7 @@ get-vars() {
   docker_image=ingy/$app:$version
 
   docker_args=(
-    --workdir "/host/${PWD#$base}" \
+    --workdir "/host/${PWD#"$base"}" \
     --env USER=user \
   )
   if $option_debug; then
@@ -388,9 +388,9 @@ get-docker-server-id() (
 # XXX shellcheck false positive
 # https://github.com/koalaman/shellcheck/issues/2169
 # shellcheck disable=2234
-func() (
+func() {
   [[ $(type -t "$1") == function ]]
-)
+}
 
 error() {
   echo-r "Error: $*" >&2

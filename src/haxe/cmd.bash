@@ -14,6 +14,7 @@ haxe:main() (
   run haxelib "$command" "$@"
 )
 
+# shellcheck disable=2016
 haxe:version() (
   version haxe '/usr/local/haxe-4.2.5/haxe --version' 1
   version haxelib 'LD_LIBRARY_PATH=/usr/local/neko-2.3.0-linux64:$LD_LIBRARY_PATH /usr/local/haxe-4.2.5/haxelib' 4

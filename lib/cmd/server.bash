@@ -36,11 +36,11 @@ server:start() (
     $option_verbose && set -x
     docker run -d --rm \
       "${docker_args[@]}" \
-      --hostname $app \
+      --hostname "$app" \
       --volume "$base":/host \
-      --volume "$root":/$app \
+      --volume "$root":"/$app" \
       --volume "$HOME/.$app":/me \
-      --volume "$bashrc:/home/user/.$app-bashrc" \
+      --volume "$bashrc":"/home/user/.$app-bashrc" \
       --volume "$bash_history":/home/user/.bash_history \
       "$docker_image" \
       sleep infinity
@@ -72,7 +72,7 @@ server:start() (
 )
 
 server:restart() (
-  server:stop
+  server:stop "$@"
   sleep 0.5
   server:start
 )
@@ -81,7 +81,7 @@ server:stop() (
   get-servers-list "$@" || return 0
 
   for server in "${servers[@]}"; do
-    read dir id name <<<"$server"
+    read -r dir id name <<<"$server"
     id=$(
       $option_verbose && set -x
       docker kill "$id"
@@ -95,7 +95,7 @@ server:status() (
   get-servers-list "$@" || return 0
 
   for server in "${servers[@]}"; do
-    read dir id name <<<"$server"
+    read -r dir id name <<<"$server"
     echo-e "* ${G}A $App Docker server is running for directory '$dir'"
     echo-y "    Docker container id '$id' ($name)"
   done
@@ -135,7 +135,7 @@ get-servers-list() {
   fi
 
   for server in "${servers[@]}"; do
-    read dir id name <<<"$server"
+    read -r dir id name <<<"$server"
     docker ps | grep -q "^$id " || {
       echo-r "Removing server entry that isn't actually running now:"
       echo-y "  >> $server"

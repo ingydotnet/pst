@@ -20,5 +20,6 @@ raku:clean() (
 
 raku:version() (
   version raku '/opt/rakudo-pkg/bin/raku --version | sed '"'"'s/\.$//'"'"'' 4
+  # shellcheck disable=2016
   version zef 'PATH=/opt/rakudo-pkg/bin:$PATH; /root/.raku/bin/zef --version' 1
 )

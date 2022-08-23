@@ -12,6 +12,7 @@ fortran:main() (
   run fpm "$command" "$@"
 )
 
+# shellcheck disable=2088
 fortran:version() (
   version gfortran 5
   version fpm '~/miniforge3/bin/fpm --version' 2

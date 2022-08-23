@@ -11,6 +11,7 @@ tsc:main() (
   npm "$@"
 )
 
+# shellcheck disable=2088
 tsc:version() (
   version coffee '~/node_modules/.bin/tsc --version' 2
   version npm 1

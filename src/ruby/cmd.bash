@@ -35,6 +35,7 @@ ruby:clean() (
   rm -fr pkg
 )
 
+# shellcheck disable=2088
 ruby:set-credentials() (
   get-config apitoken
 
