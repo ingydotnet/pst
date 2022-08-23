@@ -1,3 +1,8 @@
+[version "0.1.1"]
+  date = Tue 23 Aug 2022 06:29:54 AM PDT
+  done = Convert to use BPAN for bash dependencies
+  done = Support subcommand options
+
 [version "0.1.0"]
   date = Sat 13 Aug 2022 12:21:50 PM PDT
   done = Initial release
