@@ -95,6 +95,7 @@ release         = publish
 
 Options:
 --
+L,lang=       Specify the language to use
 R,restart     Restart server before command
 f,force       Force an action
 r,root        Run server commands as root
@@ -231,7 +232,7 @@ https://github.com/ingydotnet/pst
 version() (
   if [[ $# -eq 3 && $3 =~ ^[0-9]+$ ]]; then
     name=$1 cmd=$2 word=$3
-    words=($(run "eval $cmd | ansi2txt" || true))
+    words=($(run bash -c "eval '$cmd' | ansi2txt" || true))
   elif [[ $# -eq 2 && $2 =~ ^[0-9]+$ ]]; then
     name=$1 cmd=$1 word=$2
     words=($(run "$cmd" --version))

@@ -139,7 +139,7 @@ RUN set -x \
     done \
  && true
 
-# Link some user files and dirs fo ~root/ and ~user/ to user prefs:
+# Link some user files and dirs to ~root/ and ~user/ to user prefs:
 RUN set -x \
  && chmod a+x /root \
  && ln -s /me/ssh /root/.ssh \
@@ -147,3 +147,7 @@ RUN set -x \
  && ls -la /root \
  && ls -la /home/user \
  && true
+
+ENV BPAN_ROOT=/home/user/.bpan
+
+ENV PATH=/home/user/.bpan/bin:$PATH

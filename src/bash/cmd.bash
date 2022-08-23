@@ -17,5 +17,5 @@ bash:main() (
 
 bash:version() (
   version bash 4
-  version bpan 'echo "\???"' 1
+  version bpan 2
 )

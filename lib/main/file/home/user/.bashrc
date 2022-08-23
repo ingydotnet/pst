@@ -5,6 +5,8 @@ source /etc/profile.d/bash_completion.sh
 {
   ps1=$PS1
 
+  source "$HOME/.bpan/.rc"
+
   source "$HOME/dlang/dmd-2.100.0/activate"
 
   source "$HOME/.cargo/env"
