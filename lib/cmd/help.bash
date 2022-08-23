@@ -1,3 +1,3 @@
 help:main() (
-  lang
+  man "$app"
 )
