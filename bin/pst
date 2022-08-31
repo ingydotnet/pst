@@ -359,8 +359,9 @@ get-vars() {
 
   docker_image=ingy/$app:$version
 
+  pwd=$(pwd -P)
   docker_args=(
-    --workdir "/host/${PWD#"$base"}" \
+    --workdir "/host/${pwd#"$base"}" \
     --env USER=user \
   )
   if $option_debug; then
