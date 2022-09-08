@@ -15,6 +15,10 @@ perl:main() (
   run zild "$command" "$@"
 )
 
+perl:publish() (
+  command=release perl:main "$@"
+)
+
 perl:version() (
 version perl 'perl --version | tr -d "()"' 10
   version cpanm 4

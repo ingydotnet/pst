@@ -172,6 +172,11 @@ h,help        Get help for $command command
 get-lang() {
   local l
 
+  local libs=''
+  if [[ -d lib ]]; then
+    libs=$(find lib -type f -name '*.*' | head)
+  fi
+
   if [[ ${option_lang-} ]]; then
     lang="$option_lang"
   elif [[ -e project.clj ]]; then
@@ -180,6 +185,8 @@ get-lang() {
     lang=julia
   elif [[ -e META6.json ]]; then
     lang=raku
+  elif grep -q '\.pm' <<<"$libs"; then
+    lang=perl
   elif [[ -e Gemfile ]]; then
     lang=ruby
   elif [[ ${getopt_spec-} ]]; then

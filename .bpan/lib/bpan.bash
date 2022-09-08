@@ -10,10 +10,13 @@ bpan:main() {
   [[ $(dirname "$self") == */.bpan/lib ]] ||
     bpan:die "bpan.bash is in an unsupported place!"
   root=$(cd "$(dirname "$self")/../.." && pwd -P)
+  local_root=$(cd "$(dirname "$self")/../../.." && pwd)
 
   export PATH=$root/.bpan/lib:$root/.bpan/bin:$PATH
 
   bpan:config-read "$root/.bpan/config"
+
+  BPAN_VERSION="$(bpan:config bpan.version)"
 
   local arg
   for arg; do
@@ -47,6 +50,7 @@ bpan:config() (
     fi
   elif [[ $# -eq 2 ]]; then
     git config -f "$config_file" "$@"
+    perl -pi -e 's/^\t//' "$config_file"
   fi
 )
 

@@ -20,6 +20,6 @@ RUN set -x \
 RUN set -x \
  && touch /stamp \
  && cpanm -n \
-        INGY/Zilla-Dist-0.1.9.tar.gz \
+        INGY/Zilla-Dist-0.1.11.tar.gz \
  && find /usr -cnewer /stamp | cpio -dump /export \
  && true
