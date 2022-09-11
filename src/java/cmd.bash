@@ -19,5 +19,5 @@ java:main() (
 java:version() (
   version javac 2
   version java 2
-  version mvn 'mvn --version | sed '"'"'s/\x1b\[1\?m/ /g'"'"'' 3
+  version mvn 3
 )

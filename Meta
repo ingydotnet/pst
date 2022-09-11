@@ -20,7 +20,7 @@ site = https://github.com/ingydotnet
 
 [require "bpan"]
 prelude-bash = 0.1.0+
-getopt-bash = 0.1.0+
+getopt-bash = 0.1.3+
 
 [require "commands"]
 bash = 3.2+

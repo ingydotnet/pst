@@ -7,10 +7,10 @@ shopt -s inherit_errexit 2>/dev/null || true
 bpan:main() {
   local self root
   self=${BASH_SOURCE[0]}
-  [[ $(dirname "$self") == */.bpan/lib ]] ||
+  [[ $self == */lib/bpan.bash ]] ||
     bpan:die "bpan.bash is in an unsupported place!"
-  root=$(cd "$(dirname "$self")/../.." && pwd -P)
-  local_root=$(cd "$(dirname "$self")/../../.." && pwd)
+  root=$(cd "$(dirname "$self")/.." && pwd -P)
+  local_root=$(cd "$(dirname "$self")/../.." && pwd)
 
   export PATH=$root/.bpan/lib:$root/.bpan/bin:$PATH
 
@@ -22,12 +22,18 @@ bpan:main() {
   for arg; do
     if [[ $arg == -- ]]; then
       :
+    elif [[ $arg == --getopt ]]; then
+      source "${BPAN_ROOT?}/.bpan/lib/getopt.bash" --
     elif [[ $arg == --prelude ]]; then
-      bpan:use prelude
+      source "${BPAN_ROOT?}/.bpan/lib/prelude.bash" --
+    elif [[ $arg == --say ]]; then
+      source "${BPAN_ROOT?}/.bpan/lib/say.bash" --
     else
       bpan:die "Unknown argument '$arg' for '$self'"
     fi
   done
+
+  app=$(basename "$0")
 }
 
 bpan:die() ( printf '%s\n' "$@" >&2; exit 1 )
@@ -50,13 +56,13 @@ bpan:config() (
     fi
   elif [[ $# -eq 2 ]]; then
     git config -f "$config_file" "$@"
-    perl -pi -e 's/^\t//' "$config_file"
+    sed -i 's/^\t//' "$config_file"
   fi
 )
 
 bpan:config-read() {
   config=''
-  config_file=${1:-.bpan/config}
+  config_file=$(readlink -f "${1:-.bpan/config}")
   if [[ -f $config_file ]]; then
     config_file=$(readlink -f "$config_file")
     config=$(< "$config_file")

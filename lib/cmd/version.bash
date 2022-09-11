@@ -1,13 +1,13 @@
-version:getopt() {
-  getopt_spec="\
-$app [<$app-opts>] $command <$command-opts>
+version:getopt() (
+  echo "\
+$app [<$app-opts>] $cmd <$cmd-opts>
 
-'$app $command' Options:
+'$app $cmd' Options:
 --
 a,all         Show all language/tool versions
-h,help        Get help for $command command
+h,help        Get help for $cmd command
 "
-}
+)
 
 version:main() (
   if $option_all; then

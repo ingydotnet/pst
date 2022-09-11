@@ -8,6 +8,8 @@ RUN set -x \
  && apt-get install -y \
         ruby \
         ruby-dev \
- && gem install bundler \
+ && gem install \
+      bundler \
+      pry \
  && find /usr -cnewer /stamp | cpio -dump /export \
  && true

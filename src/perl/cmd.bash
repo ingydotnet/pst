@@ -23,5 +23,5 @@ perl:version() (
 version perl 'perl --version | tr -d "()"' 10
   version cpanm 4
   version dzil 4
-  version zild 1
+  version zild '(cd /tmp; zild --version)' 2
 )

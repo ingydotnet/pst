@@ -1,13 +1,13 @@
-server:getopt() {
+server:getopt() (
   getopt_default_help=true
   getopt_cmds=(start stop restart status)
 
-  getopt_spec="\
-$app [<$app-opts>] $command <$command-opts>
+  echo "\
+$app [<$app-opts>] $cmd <$cmd-opts>
 
 Requires one of --start, --stop, --restart, --status
 
-'$app $command' Options:
+'$app $cmd' Options:
 --
 s,start       Start $App Docker server
 k,stop        Stop $App Docker server
@@ -15,12 +15,20 @@ R,restart     Restart $App Docker server
 S,status      Get $App Docker server status
 
 a,all         Apply cmd to all servers
-h,help        Get help for $command command
+h,help        Get help for $cmd command
 "
-}
+)
 
 server:main() (
-  "server:$sub_command" "$@"
+  for action in start stop restart status; do
+    opt=option_$action
+    if ${!opt}; then
+      "server:$action" "$@"
+      return
+    fi
+  done
+
+  error "One of --start, --stop, --restart, --status is required"
 )
 
 server:start() (

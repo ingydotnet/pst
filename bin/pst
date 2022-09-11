@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=2030,2031
+# shellcheck disable=2030,2031,2128
 
 App=PST
 app=${App,,}
@@ -14,13 +14,16 @@ ROOT=${APP}_ROOT
 
 source "${!ROOT}/.bpan/lib/bpan.bash" --
 bpan:use prelude
-bpan:use getopt
 
 # https://gist.github.com/ingydotnet/9e229bd583687bc62854c7575f88a8bc
 # is the `--help` output from all the package managers used here.
 # Many command ideas came from there.
 
-getopt="\
+bpan:use getopt "\
+getopt_default=--help
+getopt_cmds_find=true
+getopt_cmds_spec=getopt-cmds-spec
+
 $app [<$app-opts>] <cmd> [<cmd-opts>] [<cmd-args>]
 $app --help       # This overview
 $app help         # Full documentation for $app
@@ -109,17 +112,39 @@ x,debug       Print lots of debugging info
 "
 
 main() (
-  get-options "$@"; set -- "${args[@]}"
+  set-env
+
+  opts=$*
+  getopt "$@"
+  set -- "${args[@]}"
+  [[ $cmd ]] ||
+    error "Invalid command '$app $opts'"
+
+  set-vars
 
   if $option_restart; then
     source "$root/lib/cmd/server.bash"
     option_all=false server:restart
   fi
 
-  func=$command:main
-
-  "$func" "$@"
+  source-once "$cmd"
+  "$cmd:main" "$@"
 )
+
+getopt-cmds-spec() {
+  source-once "$cmd"
+  if is-func "$cmd:getopt"; then
+    "$cmd:getopt"
+  fi
+}
+
+source-once() {
+  local var=_sourced_$1
+  if [[ -z ${!var-} ]]; then
+    source "$root/lib/cmd/$1.bash"
+    printf -v "$var" 1
+  fi
+}
 
 run() (
   if $option_root; then
@@ -144,8 +169,8 @@ run() (
 lang() (
   get-lang
   source "$root/src/$lang/cmd.bash"
-  if func "$lang:$command"; then
-    "$lang:$command" "$@"
+  if func "$lang:$cmd"; then
+    "$lang:$cmd" "$@"
   elif func "$lang:main"; then
     "$lang:main" "$@"
   else
@@ -153,19 +178,19 @@ lang() (
       getopt -h <<<"$getopt_spec"
     else
       "$lang:meta"
-      error "'$Y$app $command$R' not implemented for '$Y$language_name$R'"
+      error "'$Y$app $cmd$R' not implemented for '$Y$language_name$R'"
     fi
   fi
 )
 
 lang:getopt() {
   getopt_spec="\
-$app [<$app-opts>] $command <$command-opts>
+$app [<$app-opts>] $cmd <$cmd-opts>
 
-'$app $command' Options:
+'$app $cmd' Options:
 --
-l,lang=       Programming language for $command
-h,help        Get help for $command command
+l,lang=       Programming language for $cmd
+h,help        Get help for $cmd command
 "
 }
 
@@ -190,10 +215,6 @@ get-lang() {
   elif [[ -e Gemfile ]]; then
     lang=ruby
   elif [[ ${getopt_spec-} ]]; then
-    echo "Can't determine language. Use --lang=..."
-    echo
-    getopt -h <<<"$getopt_spec"
-  else
     error "Can't determine language. Use --lang=..."
   fi
 
@@ -253,97 +274,14 @@ version() (
   printf '  %-12s %s\n' "$name:" "$version" | tr -d '\r'
 )
 
-get-options() {
-  local getopt_default_help=false getopt_args='@args' getopt_debug=debug
-
+set-env() {
   root=${!ROOT}
   version=$(git config -f "$root/.bpan/config" bpan.version)
   [[ -f $root/bin/$app ]] ||
     error "$ROOT variable is has bad value '$root'"
-
-  if [[ $# -eq 0 ]]; then
-    set -- --help
-  fi
-
-  cmds=($(grep -E '^  \w+  ' <<<"$getopt" | cut -d' ' -f3))
-
-  option_quiet=false
-  local words=() want=true
-  while [[ $# -gt 0 ]]; do
-    if [[ $1 =~ ^(-l|--lang)$ ]]; then
-      words+=("$1"); shift
-      want=false
-      continue
-    fi
-    if $want && [[ $1 =~ ^[a-z]+$ ]]; then
-      command=$1; shift
-      [[ " ${cmds[*]} " == *\ $command\ * ]] ||
-        error "Invalid $app command '$command'"
-      break
-    fi
-    words+=("$1"); shift
-    want=true
-  done
-  local cmd_opts=("$@")
-  set -- "${words[@]}"
-
-  getopt "$@" <<<"$getopt"
-  $option_debug && set -x
-
-  args+=("${cmd_opts[@]}")
-
-  if $option_version; then
-    print-version
-    exit
-  fi
-
-  if ! [[ ${command-} ]]; then
-    if [[ ${option_server-} ]]; then
-      command=server
-      server_command=$option_server
-      [[ $server_command =~ ^(start|stop|restart|status)$ ]] ||
-        error "--server=... must be 'start', 'stop', 'restart' or 'status'"
-    elif [[ ${option_run-} ]]; then
-      command=run
-    else
-      error "You must specify a command option"
-    fi
-  fi
-
-  # Get possible sub-command options:
-  source "$root/lib/cmd/$command.bash"
-  if func "$command:getopt"; then
-    unset sub_command
-    local getopt_default_help=false
-    local getopt_args='@args'
-    local getopt_cmds
-    getopt_cmds=()
-
-    "$command:getopt"
-
-    set -- "${args[@]}"
-    args=()
-
-    getopt='' getopt "$@" <<<"$getopt_spec"
-
-    if [[ ${#getopt_cmds[*]} -gt 0 ]]; then
-      local cmd
-      for cmd in "${getopt_cmds[@]}"; do
-        local var=option_$cmd
-        if "${!var}"; then
-          sub_command=$cmd
-        fi
-      done
-
-      [[ ${sub_command-} ]] ||
-        getopt -h <<<"$getopt_spec"
-    fi
-  fi
-
-  get-vars
 }
 
-get-vars() {
+set-vars() {
   langs=($(cd "$root/src" && echo *))
 
   base=$(git rev-parse --show-toplevel 2>/dev/null || readlink -f .)
@@ -407,7 +345,7 @@ error() {
 }
 
 todo() {
-  error "'$app $command' not implemented yet"
+  error "'$app $cmd' not implemented yet"
 }
 
 R='\e[1;31m'

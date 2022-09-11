@@ -1,12 +1,12 @@
-shell:getopt() {
-  getopt_spec="\
-$app [<$app-opts>] $command <$command-opts>
+shell:getopt() (
+  echo "\
+$app [<$app-opts>] $cmd <$cmd-opts>
 
 Use ${APP}_SHELL to set default
 
 Note: ash = dash, csh = tcsh
 
-'$app $command' Options:
+'$app $cmd' Options:
 --
 b,bash        Start 'bash' shell
 d,dash        Start 'dash' shell
@@ -16,9 +16,9 @@ t,tcsh        Start 'tcsh' shell
 z,zsh         Start 'zsh'  shell
 
 v,versions    Print shell versions
-h,help        Get help for $command command
+h,help        Get help for $cmd command
 "
-}
+)
 
 shell:main() (
   if $option_versions; then
@@ -36,7 +36,7 @@ shell:main() (
     opt=option_$shell
     if ${!opt}; then
       shell:runner "$shell"
-    return
+      return
     fi
   done
 
@@ -61,10 +61,9 @@ shell:versions() (
 )
 
 shell:shells() (
-  shell:getopt
   while IFS=', ' read -r x shell rest; do
     echo "$shell"
   done < <(
-    grep 'shell$' <<<"$getopt_spec"
+    grep 'shell$' <<<"$(shell:getopt)"
   )
 )
