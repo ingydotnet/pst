@@ -1,6 +1,6 @@
 [bpan]
 name = pst
-version = 0.1.3
+version = 0.1.4
 abstract = Package Super Tool — Package Management for All Programming Languages
 license = MIT
 copyright = 2022
