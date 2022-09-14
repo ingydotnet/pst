@@ -5,9 +5,9 @@ abstract = Package Super Tool — Package Management for All Programming Languag
 license = MIT
 copyright = 2022
 
-site = $repo
-repo = https://github.com/ingydotnet/pst
-bug = $repo/issues/
+site = $bpan.repo
+repo = $author.site/pst
+bug = $bpan.repo/issues/
 irc = irc.libera.chat/pst
 
 [author]
@@ -32,7 +32,7 @@ perl = 5.14+
 [file "bpan"]
 update = .rc
 update = Makefile
-update = *
-update = *
+update = test/init
+update = test/00-shellcheck.t
 
 # vim: ft=gitconfig:
