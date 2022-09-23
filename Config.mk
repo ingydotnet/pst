@@ -6,7 +6,7 @@ ifndef PST_ROOT
     $(error PST_ROOT not set. 'source /path/to/$(app)/.rc')
 endif
 
-PST_VERSION := $(shell git config -f $(PST_ROOT)/.bpan/config bpan.version)
+PST_VERSION := $(shell git config -f $(PST_ROOT)/.bpan/config package.version)
 
 BASE_NAME := $(app)/$(app)
 
