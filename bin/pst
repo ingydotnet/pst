@@ -12,14 +12,14 @@ ROOT=${APP}_ROOT
   exit 1
 }
 
-source "${!ROOT}/.bpan/lib/bpan.bash" --
-bpan:use prelude
+source "${!ROOT}/.bpan/lib/bpan.bash" --app
+bpan:source bashplus
 
 # https://gist.github.com/ingydotnet/9e229bd583687bc62854c7575f88a8bc
 # is the `--help` output from all the package managers used here.
 # Many command ideas came from there.
 
-bpan:use getopt "\
+bpan:source getopt "\
 getopt_default=--help
 getopt_cmds_find=true
 getopt_cmds_spec=getopt-cmds-spec
@@ -133,7 +133,7 @@ main() (
 
 getopt-cmds-spec() {
   source-once "$cmd"
-  if is-func "$cmd:getopt"; then
+  if +is-func "$cmd:getopt"; then
     "$cmd:getopt"
   fi
 }
@@ -276,7 +276,7 @@ version() (
 
 set-env() {
   root=${!ROOT}
-  version=$(git config -f "$root/.bpan/config" bpan.version)
+  version=$(git config -f "$root/.bpan/config" package.version)
   [[ -f $root/bin/$app ]] ||
     error "$ROOT variable is has bad value '$root'"
 }

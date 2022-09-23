@@ -61,7 +61,7 @@ getopt() {
 }
 
 getopt:cmd-getopt() {
-  is-func "$getopt_cmds_spec" ||
+  [[ $(type -t "$getopt_cmds_spec") == function ]] ||
     getopt:error \
       "getopt_cmds_spec='$getopt_cmds_spec' must be a function name"
   local getopt_spec=''
@@ -206,7 +206,7 @@ getopt:parse-spec() {
       declare -a "$var"
     elif [[ $kind == '?'* ]]; then
       kind=dual
-      printf -v "$var" false
+      printf -v "$var" ''
     else
       kind=bool
       if [[ ${!var-} != true ]]; then
@@ -303,7 +303,7 @@ getopt:set-opts() {
     elif [[ $kind == dual ]]; then
       if [[ ${value-} ]]; then
         [[ $type ]] && getopt:validate
-        if [[ ${!var} == false ]]; then
+        if ! [[ ${!var} ]]; then
           printf -v "$var" '%s' "$value"
         fi
       else

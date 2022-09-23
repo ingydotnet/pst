@@ -1,13 +1,17 @@
 [bpan]
+api-version = 1
+
+[package]
 name = pst
 version = 0.1.4
-abstract = Package Super Tool — Package Management for All Programming Languages
+title = Package Super Tool — Package Management for All Programming Languages
 license = MIT
 copyright = 2022
 
-site = $bpan.repo
-repo = $author.site/pst
-bug = $bpan.repo/issues/
+repo = https://github.com/ingydotnet/pst
+branch = main
+site = $package.repo
+bug = $package.repo/issues/
 irc = irc.libera.chat/pst
 
 [author]
@@ -18,9 +22,12 @@ libera = ingydotnet
 twitter = ingydotnet
 site = https://github.com/ingydotnet
 
+[owner]
+github = ingydotnet
+
 [require "bpan"]
-prelude-bash = 0.1.0+
-getopt-bash = 0.1.3+
+bashplus = 0.1.0+
+getopt-bash = 0.1.0+
 
 [require "commands"]
 bash = 3.2+
@@ -29,10 +36,14 @@ git = 2.7+
 make = 3.81+
 perl = 5.14+
 
-[file "bpan"]
-update = .rc
-update = Makefile
-update = test/init
-update = test/00-shellcheck.t
+[update]
+package = bashplus
+package = getopt-bash
+template = License
+template = Makefile
+template = ReadMe.md doc/pst.md
+template = test/00-shellcheck.t
+template = test/init
+manpage = doc/pst.md
 
 # vim: ft=gitconfig:
