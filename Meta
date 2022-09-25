@@ -40,7 +40,6 @@ perl = 5.14+
 package = bashplus
 package = getopt-bash
 template = License
-template = Makefile
 template = ReadMe.md doc/pst.md
 template = test/00-shellcheck.t
 template = test/init
