@@ -3,7 +3,7 @@ api-version = 1
 
 [package]
 name = pst
-version = 0.1.6
+version = 0.1.7
 title = Package Super Tool — Package Management for All Programming Languages
 license = MIT
 copyright = 2022

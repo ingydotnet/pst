@@ -1,3 +1,7 @@
+[version "0.1.7"]
+date = Sun Sep 25 01:20:26 PM EDT 2022
+done = Fix problems with BPAN integration
+
 [version "0.1.6"]
 date = Fri Sep 23 02:59:22 PM EDT 2022
 done = Fix Makefile issues
