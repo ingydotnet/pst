@@ -70,6 +70,7 @@ test:
 
 clean:
 	rm -fr target
+	rm -f lib/*/tmp.*
 
 push: build
 	docker push $(DOCKER_IMAGE)
