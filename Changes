@@ -1,3 +1,7 @@
+[version "0.1.8"]
+date = Sun Sep 25 01:42:01 PM EDT 2022
+done = Build with latest bpan
+
 [version "0.1.7"]
 date = Sun Sep 25 01:20:26 PM EDT 2022
 done = Fix problems with BPAN integration
