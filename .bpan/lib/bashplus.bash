@@ -5,7 +5,7 @@
 
 
 bashplus:version() (
-  VERSION=0.1.18
+  VERSION=0.1.22
   echo "bashplus $VERSION"
 )
 
@@ -21,7 +21,8 @@ bashplus:version() (
   # * TODO --plain to not show line numbers
   # * TODO --stack for full stack trace
   #
-  # NOTE: 'die' id the only bashplus function not starting with '+'.
+  # NOTE: 'die' and 'warn' are the only bashplus functions not starting with
+  # a '+' character.
 
   die() {
     set +x
@@ -44,7 +45,7 @@ bashplus:version() (
     [[ $# -gt 0 ]] || set -- Died
 
     echo -en "$R"
-    +warn "$@"
+    printf '%s\n' "$@" >&2
     echo -en "$Z"
 
     if [[ $# -ne 1 || $1 != *$'\n' ]]; then
@@ -60,7 +61,7 @@ bashplus:version() (
     exit 1
   }
 
-  +warn() {
+  warn() {
     printf '%s\n' "$@" >&2
   }
 
@@ -84,10 +85,10 @@ bashplus:version() (
 # NOTE: BashPlus functions defined in name order.
 
 # Functions to redirect stdout and stderr.
-function +1:x { "$@" 1>/dev/null; }
-function +2:1 { "$@" 2>&1; }
-function +2:x { "$@" 2>/dev/null; }
-function +o:x { "$@" &>/dev/null; }
++1:x() { "$@" 1>/dev/null; }
++2:1() { "$@" 2>&1;        }
++2:x() { "$@" 2>/dev/null; }
++o:x() { "$@" &>/dev/null; }
 
 # Functions to assert that commands are available.
 +assert-cmd() ( +is-cmd "$@" ||
@@ -118,7 +119,7 @@ function +o:x { "$@" &>/dev/null; }
     return
 
   [[ $out =~ ([0-9]+\.[0-9]+(\.[0-9]+)?) ]] || {
-    +warn "Can't determine version number from '$command'"
+    echo "Can't determine version number from '$command'" >&2
     return 1
   }
 
@@ -137,6 +138,18 @@ function +o:x { "$@" &>/dev/null; }
       ))
     ))
   ))
+)
+
+# Check if a file or directory is empty
++is-empty() (
+  path=${1?}
+  if [[ -f $path ]]; then
+    ! [[ -s $path ]]
+  elif [[ -d $path ]]; then
+    ! [[ $(shopt -s nullglob; printf '%s' *) ]]
+  else
+    die "'$path' is not a file or directory"
+  fi
 )
 
 # Check if 2 files are the same or different.
@@ -190,17 +203,51 @@ function +o:x { "$@" &>/dev/null; }
 # Sort in true ascii order.
 +sort() ( LC_ALL=C sort "$@" )
 
-# Generate a unique symbol.
+# Generate a unique symbol by joining a prefix (default is 'sym') to a random
+# string, separated by an underscore (`_`) character.
 # Useful for unique variable and function names.
-if +can uuidgen; then
+# Here we define 6 different ways to generate a random string, since there is
+# no standard way to do this in Bash 3.2+.
+
+# For 5.0+ use EPOCHREALTIME unless it is already spoiled.
+if [[ ${EPOCHREALTIME-} != "${EPOCHREALTIME-}" ]]; then
+  # prevent `unset EPOCHREALTIME` which spoils it:
+  readonly EPOCHREALTIME
+  # This is fastest by far:
+  +sym() {
+    echo "${1:-sym_}_${EPOCHREALTIME/./_}"
+  }
+# uuidgen is pretty standard and pretty fast
+elif +can uuidgen; then
   +sym() (
-    s=$(uuidgen --random)
+    s=$(uuidgen)
     echo "${1:-sym}_${s//-/_}"
   )
-else
+# BSD date (macOS) doesn't support nanoseconds
+elif date --version &>/dev/null; then
   +sym() (
     echo "${1:-sym}_$(date '+%s_%N')"
   )
+# `od` is super common but check for /dev/urandom
+elif +can od && [[ -e /dev/urandom ]]; then
+  +sym() (
+    echo "${1:-sym}_$(printf '%s' $(od -A n -t x2 -N 16 /dev/urandom))"
+  )
+# Bash's RANDOM is 3.2+ but can also be spoiled by unset.
+elif [[ ${RANDOM}_${RANDOM} != ${RANDOM}_${RANDOM} ]]; then
+  readonly RANDOM
+  +sym() (
+    echo "${1:-sym_}_${RANDOM}_${RANDOM}_${RANDOM}_${RANDOM}"
+  )
+# Try perl
+elif +is-cmd perl; then
+  +sym() (
+    echo "${1:-sym_}_$(
+      perl -MTime::HiRes -e 'print join "_", Time::HiRes::gettimeofday'
+    )"
+  )
+else
+  die "bashplus can't define '+sym'"
 fi
 
 # Allow multiple traps to be performed.

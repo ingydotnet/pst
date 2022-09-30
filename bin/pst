@@ -2,6 +2,8 @@
 
 # shellcheck disable=2030,2031,2128
 
+VERSION=0.1.41
+
 App=PST
 app=${App,,}
 APP=${app^^}
@@ -117,6 +119,12 @@ main() (
   opts=$*
   getopt "$@"
   set -- "${args[@]}"
+
+  if $option_version; then
+    echo "$VERSION"
+    return
+  fi
+
   [[ $cmd ]] ||
     error "Invalid command '$app $opts'"
 

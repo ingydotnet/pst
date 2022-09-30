@@ -166,10 +166,12 @@ getopt:parse-spec() {
     if [[ $line == '' ]]; then
       getopt_parseopt+=$' \n'
       continue
+    elif [[ $line == \#\ * || $line == \# ]]; then
+      continue
     fi
 
     # if 's,long...' (short,long)
-    if [[ $line =~ ^([a-zA-Z0-9]),([a-z][-a-z0-9]+)([=?][^\ ]*)?\  ]]; then
+    if [[ $line =~ ^([a-zA-Z0-9]),([a-z][-a-z0-9]+)([=?*][^\ ]*)?\  ]]; then
       short=${BASH_REMATCH[1]}
       long=${BASH_REMATCH[2]}
       kind=${BASH_REMATCH[3]:0:1}
@@ -177,7 +179,7 @@ getopt:parse-spec() {
       name=$long
 
     # if 's...' (short only)
-    elif [[ $line =~ ^([a-zA-Z0-9])([=?][^\ ]*)?\  ]]; then
+    elif [[ $line =~ ^([a-zA-Z0-9])([=?*][^\ ]*)?\  ]]; then
       short=${BASH_REMATCH[1]}
       long=''
       kind=${BASH_REMATCH[2]}
@@ -185,7 +187,7 @@ getopt:parse-spec() {
       name=$short
 
     # if 'long...' (long only)
-    elif [[ $line =~ ^([a-z][-a-z0-9]+)([=?][^\ ]*)?\  ]]; then
+    elif [[ $line =~ ^([a-z][-a-z0-9]+)([=?*][^\ ]*)?\  ]]; then
       short=''
       long=${BASH_REMATCH[1]}
       kind=${BASH_REMATCH[2]}
@@ -205,7 +207,14 @@ getopt:parse-spec() {
 
     if [[ $kind == '='* ]]; then
       kind=value
-      declare -a "$var"
+      if ! [[ ${!var-} ]]; then
+        # XXX Is there a better way to indirectly assign array variable =('')?
+        if shopt -s compat41 2>/dev/null; then
+          declare -g -a "$var"=''
+        else
+          eval "$var=('')"
+        fi
+      fi
     elif [[ $kind == '?'* ]]; then
       kind=dual
       printf -v "$var" ''
@@ -224,6 +233,8 @@ getopt:parse-spec() {
         getopt_required+=("$name")
         flag=${flag:1}
         line=${line/+/}
+      elif [[ ${flag:0:1} == '*' ]]; then
+        flag=${flag:1}
       elif [[ ${flag:0:1} == '@' ]] && ! $mult; then
         mult=true
         flag=${flag:1}
@@ -313,6 +324,8 @@ getopt:set-opts() {
       else
         printf -v "$var" true
       fi
+    else
+      die
     fi
 
     # Increment option_count_<name>
