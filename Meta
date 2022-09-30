@@ -39,10 +39,10 @@ perl = 5.14+
 [update]
 package = bashplus
 package = getopt-bash
-template = License
-template = ReadMe.md doc/pst.md
-template = test/00-shellcheck.t
-template = test/init
-manpage = doc/pst.md
+file = License
+file = ReadMe.md doc/pst.md
+file = test/00-shellcheck.t
+file = test/init
+man1 = doc/pst.md
 
 # vim: ft=gitconfig:
