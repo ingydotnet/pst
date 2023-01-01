@@ -33,13 +33,14 @@ getopt() {
   local output
   local rc=0
   output=$(
-    echo "$getopt_parseopt" |
-      git rev-parse --parseopt --stuck-long -- "$@"
+    git rev-parse --parseopt --stuck-long -- "$@" <<<"$getopt_parseopt"
   ) || rc=$?
 
   if [[ $rc -ne 0 ]]; then
     if [[ $output == cat* ]]; then
-      eval "$output" | getopt:pager
+      local pager=${PAGER-}
+      [[ $pager && $pager != less ]] || pager='less -FRX'
+      eval "$output" | $pager
     elif [[ $output ]]; then
       die "Unexpected results from 'git rev-parse --parseopt'"
     fi
@@ -128,6 +129,10 @@ getopt:parse-spec() {
   local var count
 
   while IFS=$'\n' read -r line; do
+    if [[ $line == \#\ * || $line == \# ]]; then
+      continue
+    fi
+
     # Look for getopt config variables at top of spec:
     if $top; then
       if [[ $line == getopt_* ]]; then
@@ -165,8 +170,6 @@ getopt:parse-spec() {
     # Change an empty line to ' ' so it will appear in error messages:
     if [[ $line == '' ]]; then
       getopt_parseopt+=$' \n'
-      continue
-    elif [[ $line == \#\ * || $line == \# ]]; then
       continue
     fi
 
@@ -376,9 +379,7 @@ getopt:error() {
   die "[getopt] Error: $1"
 }
 
-getopt:pager() {
-  less -FRX
-}
-
 [[ $0 == "${BASH_SOURCE[0]}" ]] ||
   getopt:source "$@"
+
+export -f getopt

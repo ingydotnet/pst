@@ -15,13 +15,13 @@ ROOT=${APP}_ROOT
 }
 
 source "${!ROOT}/.bpan/lib/bpan.bash" --app
-source bashplus.bash
+bpan:source bashplus +sys
 
 # https://gist.github.com/ingydotnet/9e229bd583687bc62854c7575f88a8bc
 # is the `--help` output from all the package managers used here.
 # Many command ideas came from there.
 
-source getopt.bash "\
+bpan:source getopt "\
 getopt_default=--help
 getopt_cmds_find=true
 getopt_cmds_spec=getopt-cmds-spec
@@ -141,7 +141,7 @@ main() (
 
 getopt-cmds-spec() {
   source-once "$cmd"
-  if +is-func "$cmd:getopt"; then
+  if +sys:is-func "$cmd:getopt"; then
     "$cmd:getopt"
   fi
 }

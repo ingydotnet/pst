@@ -1,1 +1,37 @@
-../Meta
+[bpan]
+version = 0.1.105
+updated = 2022-12-28T18:21:01Z
+
+[package]
+id = github:ingydotnet/pst
+version = 0.1.9
+title = Package Super Tool — Package Management for All Programming Languages
+license = MIT
+copyright = 2022-2023
+type = bash:app
+
+irc = irc.libera.chat/pst
+
+[author "github:ingydotnet"]
+name = Ingy döt Net
+email = ingy@ingy.net
+irc = ingy@irc.libera.chat
+matrix = @ingy:yaml.io
+
+[require "command"]
+docker = 20.0+
+git = 2.9+
+make = 3.81+
+perl = 5.14+
+
+[update]
+package = bashplus:@
+package = bashplus:@/sys
+package = getopt-bash
+file = License
+file = ReadMe.md doc/pst.md
+file = test/00-shellcheck.t
+file = test/init
+man1 = doc/pst.md
+
+# vim: ft=gitconfig:
