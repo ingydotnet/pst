@@ -2,7 +2,7 @@ ARG FROM
 FROM $FROM
 ARG TAG
 
-RUN echo '0.1.41' \
+RUN bpan_version=0.1.107 \
  && set -x \
  && touch /stamp \
  && git clone --branch=main https://github.com/bpan-org/bpan /root/.bpan \

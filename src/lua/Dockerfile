@@ -7,8 +7,8 @@ RUN set -x \
  && cd /tmp/ \
  && curl -fsSL https://www.lua.org/ftp/lua-5.4.4.tar.gz | tar xz \
  && make -C lua-5.4.4/ linux install \
- && curl -fSSL https://luarocks.org/releases/luarocks-3.9.1.tar.gz | tar xz \
- && cd luarocks-3.9.1/ \
+ && curl -fSSL https://luarocks.org/releases/luarocks-3.9.2.tar.gz | tar xz \
+ && cd luarocks-3.9.2/ \
  && ./configure \
  && make \
  && make install \

@@ -13,7 +13,7 @@ virtual machine (JVM) regardless of the underlying computer architecture.
 }
 
 java:main() (
-  run maven "$command" "$@"
+  run mvn "$cmd" "$@"
 )
 
 java:version() (
