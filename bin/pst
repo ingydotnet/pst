@@ -118,6 +118,7 @@ main() (
 
   opts=$*
   getopt "$@"
+  $option_debug && set -x
   set -- "${args[@]}"
 
   if $option_version; then
@@ -127,6 +128,7 @@ main() (
 
   [[ $cmd ]] ||
     error "Invalid command '$app $opts'"
+  command=$cmd
 
   set-vars
 
