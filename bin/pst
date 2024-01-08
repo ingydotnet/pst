@@ -259,7 +259,7 @@ print-version() (
   cat <<...
 $app v$version
 Package Super Tool
-Copyright 2022 Ingy döt Net
+Copyright 2022-2024 Ingy döt Net
 https://github.com/ingydotnet/pst
 ...
 )

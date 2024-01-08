@@ -57,6 +57,9 @@ purge: force
 	    xargs docker rmi -f || true
 
 update: meta-update
+ifneq (,$(shell command -v bpan))
+	bpan update
+endif
 
 meta-update:
 	$(ROOT)/lib/tool/bin/meta-update

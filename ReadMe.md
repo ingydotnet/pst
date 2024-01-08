@@ -142,7 +142,7 @@ tools that you very likely have installed on your computer already:
 
 ## Copyright and License
 
-Copyright 2022 by Ingy döt Net
+Copyright 2022-2024 by Ingy döt Net
 
 This is free software, licensed under:
 
