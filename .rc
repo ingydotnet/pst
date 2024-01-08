@@ -1,7 +1,11 @@
 # shellcheck shell=bash disable=2086
 
 PST_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
+
 PATH=$PST_ROOT/bin:$PST_ROOT/.bpan:$PATH
-MANPATH=$(IFS=:; set -- "$PST_ROOT/man" $MANPATH; echo "$*")
+
+[[ -z $MANPATH || $MANPATH == :* ]] &&
+  MANPATH=:$PST_ROOT/man$MANPATH ||
+  MANPATH=$PST_ROOT/man:$MANPATH
 
 export PATH MANPATH PST_ROOT
